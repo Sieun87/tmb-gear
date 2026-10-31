@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TMB 기어 리스트</title>
+<meta name="theme-color" content="#EDF0EF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111716" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="TMB 기어">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root { color-scheme: light; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); -webkit-text-size-adjust: 100%; }
+body { margin: 0; }
+[hidden] { display: none !important; }
+</style>
+<style>
+/* Layout: one narrow column — weight summary card on top, then a section per category with its gear rows */
+:root {
+  --bg: #EDF0EF;
+  --surface: #FFFFFF;
+  --sunk: #F4F6F5;
+  --ink: #1B2523;
+  --muted: #64716E;
+  --line: #D8DFDD;
+  --accent: #2C6E8A;
+  --accent-ink: #FFFFFF;
+  --k-base: #2C6E8A;
+  --k-cons: #B9822A;
+  --k-worn: #5E6A67;
+  --danger: #B3402F;
+  --ok: #3E8A5C;
+  --f-display: "Bricolage Grotesque", "IBM Plex Sans KR", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --f-num: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111716; --surface: #19211F; --sunk: #141B19; --ink: #E5ECEA; --muted: #93A29F;
+    --line: #2A3532; --accent: #6DB4D0; --accent-ink: #0E1A1F;
+    --k-base: #6DB4D0; --k-cons: #E2B25C; --k-worn: #A3B0AD; --danger: #E58372; --ok: #7CC796;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111716; --surface: #19211F; --sunk: #141B19; --ink: #E5ECEA; --muted: #93A29F;
+  --line: #2A3532; --accent: #6DB4D0; --accent-ink: #0E1A1F;
+  --k-base: #6DB4D0; --k-cons: #E2B25C; --k-worn: #A3B0AD; --danger: #E58372; --ok: #7CC796;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 64px;
+}
+.wrap { max-width: 760px; margin: 0 auto; display: grid; gap: 20px; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.num { font-family: var(--f-num); font-variant-numeric: tabular-nums; }
+
+/* header */
+.top { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; }
+.eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 4px; }
+h1 { font-family: var(--f-display); font-weight: 700; font-size: clamp(26px, 6vw, 34px); line-height: 1.1; margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+.route { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+.top-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* buttons */
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 7px 12px; font-size: 14px; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.btn.danger { color: var(--danger); }
+.btn.danger.solid { background: var(--danger); color: var(--surface); border-color: var(--danger); }
+.btn.on { border-color: var(--accent); color: var(--accent); }
+.link { background: none; border: 0; padding: 4px 6px; color: var(--muted); font-size: 13px; border-radius: 6px; }
+.link:hover { color: var(--ink); background: var(--sunk); }
+.link.del:hover { color: var(--danger); }
+
+/* summary card */
+.summary { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.sum-top { display: grid; grid-template-columns: 150px 1fr auto; gap: 20px; align-items: center; padding: 20px; }
+.donut { width: 150px; height: 150px; position: relative; }
+.donut svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.donut-center { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+.donut-center b { font-family: var(--f-display); font-size: 20px; font-weight: 700; }
+.donut-center span { display: block; font-size: 11px; color: var(--muted); letter-spacing: .06em; }
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 20px; }
+.stat-label { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.stat-label i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.stat-val { font-family: var(--f-display); font-size: 22px; font-weight: 600; margin-top: 2px; }
+.stat.total .stat-val { font-size: 26px; font-weight: 700; }
+.chev { background: none; border: 0; color: var(--muted); padding: 8px; border-radius: 8px; align-self: start; }
+.chev svg { transition: transform .2s; display: block; }
+.chev[aria-expanded="false"] svg { transform: rotate(180deg); }
+.progress { padding: 0 20px 16px; display: grid; gap: 6px; }
+.progress-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+.bar { height: 6px; background: var(--sunk); border-radius: 3px; overflow: hidden; }
+.bar > div { height: 100%; background: var(--ok); border-radius: 3px; transition: width .3s; }
+.legend { list-style: none; margin: 0; padding: 6px 0; border-top: 1px solid var(--line); }
+.legend li { display: grid; grid-template-columns: 12px minmax(0,1fr) auto 48px; gap: 12px; align-items: center; padding: 9px 20px; }
+.legend li:hover { background: var(--sunk); }
+.legend a { color: inherit; text-decoration: none; overflow-wrap: anywhere; }
+.legend .w { color: var(--muted); text-align: right; }
+.legend .pct { color: var(--accent); text-align: right; font-weight: 500; }
+.dot { width: 12px; height: 12px; border-radius: 50%; background: var(--c); flex: none; }
+
+/* toolbar */
+.toolbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.toolbar h2 { font-family: var(--f-display); font-size: 18px; margin: 0; }
+
+/* categories */
+.cats { display: grid; gap: 12px; }
+.cat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; scroll-margin-top: 16px; }
+.cat-head { display: flex; align-items: center; gap: 8px; padding: 10px 10px 10px 14px; }
+.cat-toggle { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; background: none; border: 0; padding: 4px 0; text-align: left; }
+.cat-name { font-weight: 600; font-size: 16px; overflow-wrap: anywhere; }
+.cat-count { font-size: 12px; color: var(--muted); }
+.cat-count.done { color: var(--ok); }
+.cat-weight { font-size: 14px; color: var(--muted); white-space: nowrap; }
+.cat-tools { display: flex; }
+.cat-caret { color: var(--muted); transition: transform .2s; flex: none; }
+.cat.closed .cat-caret { transform: rotate(-90deg); }
+.cat-body { border-top: 1px solid var(--line); }
+.cat.closed .cat-body { display: none; }
+
+.items { list-style: none; margin: 0; padding: 0; }
+.item { display: grid; grid-template-columns: 28px minmax(0,1fr) auto auto; gap: 10px; align-items: center; padding: 9px 10px 9px 14px; border-bottom: 1px solid var(--line); }
+.item:last-child { border-bottom: 0; }
+.item.checked .item-name { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); }
+.item-main { min-width: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.item-name { overflow-wrap: anywhere; }
+.kind { font-size: 11px; padding: 1px 7px; border-radius: 999px; border: 1px solid currentColor; line-height: 1.5; white-space: nowrap; }
+.kind-base { color: var(--k-base); }
+.kind-consumable { color: var(--k-cons); }
+.kind-worn { color: var(--k-worn); }
+.item-num { text-align: right; font-size: 13px; white-space: nowrap; }
+.item-num .q { color: var(--muted); margin-right: 8px; }
+.item-tools { display: flex; }
+
+.chk { position: relative; width: 22px; height: 22px; display: inline-block; }
+.chk input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.chk span { position: absolute; inset: 0; border: 1.5px solid var(--muted); border-radius: 6px; pointer-events: none; }
+.chk input:checked + span { background: var(--ok); border-color: var(--ok); }
+.chk input:checked + span::after { content: ""; position: absolute; left: 7px; top: 3px; width: 5px; height: 10px; border: solid var(--surface); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.chk input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.empty-cat { padding: 14px; color: var(--muted); font-size: 14px; }
+.add-row { padding: 8px 10px; border-top: 1px dashed var(--line); }
+.add-row .link { color: var(--accent); }
+
+/* forms */
+.form { display: grid; grid-template-columns: minmax(0, 2fr) 70px 100px minmax(0, 1fr); gap: 8px; padding: 12px 14px; background: var(--sunk); align-items: end; }
+.form.cat-form { grid-template-columns: minmax(0, 1fr) auto; }
+.form.has-cat { grid-template-columns: minmax(0, 2fr) 70px 100px minmax(0, 1fr) minmax(0, 1fr); }
+.field { display: grid; gap: 3px; min-width: 0; }
+.field label { font-size: 11px; color: var(--muted); letter-spacing: .04em; }
+.field input, .field select { width: 100%; min-width: 0; border: 1px solid var(--line); background: var(--surface); border-radius: 7px; padding: 7px 9px; font-size: 15px; }
+.form-actions { grid-column: 1 / -1; display: flex; gap: 8px; justify-content: flex-end; }
+.confirm { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 14px; background: var(--sunk); font-size: 14px; }
+.confirm p { margin: 0; flex: 1; min-width: 180px; }
+
+.state { padding: 36px 20px; text-align: center; color: var(--muted); background: var(--surface); border: 1px dashed var(--line); border-radius: 12px; display: grid; gap: 12px; justify-items: center; }
+.state b { color: var(--ink); font-size: 16px; }
+
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px; max-width: calc(100% - 32px); z-index: 20; }
+
+@media (max-width: 560px) {
+  .sum-top { grid-template-columns: 1fr auto; }
+  .donut { grid-row: 1; width: 120px; height: 120px; }
+  .stats { grid-column: 1 / -1; }
+  .chev { grid-column: 2; grid-row: 1; }
+  .form, .form.has-cat { grid-template-columns: 1fr 1fr; }
+  .form .field.name { grid-column: 1 / -1; }
+  .item { grid-template-columns: 26px minmax(0,1fr) auto; }
+  .item-tools { grid-column: 2 / -1; justify-content: flex-end; margin-top: -6px; }
+  .cat-weight { font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<style>
+.backup { display: grid; gap: 8px; padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; font-size: 14px; color: var(--muted); }
+.backup b { color: var(--ink); font-size: 15px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <p class="eyebrow">Tour du Mont Blanc · 백패킹</p>
+      <h1>TMB 기어 리스트</h1>
+      <p class="route">샤모니 · 쿠르마예 · 샹페 — 약 170 km, 누적 상승 약 10,000 m</p>
+    </div>
+  </header>
+  <main id="app" class="wrap" aria-live="polite"></main>
+  <section class="backup" aria-label="백업">
+    <b>백업</b>
+    <span>장비 목록은 이 휴대폰 안에만 저장돼요. 앱을 지우거나 브라우저 데이터를 지우면 함께 사라지니, 가끔 백업 파일로 내보내 두세요.</span>
+    <div class="top-actions">
+      <button class="btn" data-action="export">백업 내보내기</button>
+      <label class="btn" for="import-file">백업 불러오기</label>
+      <input id="import-file" type="file" accept="application/json,.json" hidden>
+    </div>
+  </section>
+</div>
+<div id="toast" class="toast" hidden></div>
+<script>
+const PALETTE = ["#4FA89A","#6A93D1","#A3BA6E","#E2B04A","#D58AAE","#5FB3C9","#E07B5F","#A07CC9","#8CC07A","#7C86D9","#4E9FD4","#C9A27C"];
+const KINDS = { base: "베이스", consumable: "소모", worn: "착용" };
+const DEFAULT_CATS = ["Clothing","Food","Electronics","Sleep system","Backpack","Shelter","Cook kit","Insulation","Storage","Toiletries","Toiletries - 소비재","First aid kit","Makeup","ETC"];
+const STORE = "tmb-gear-v1";
+const UI_STORE = "tmb-gear-ui";
+
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const defaultCats = () => DEFAULT_CATS.map((name, i) => ({ id: uid() + i, name, order: i + 1, color: PALETTE[i % PALETTE.length] }));
+
+/* ---------- data (this device only) ---------- */
+let cats = [], items = [];
+function loadData() {
+  try {
+    const s = JSON.parse(localStorage.getItem(STORE));
+    if (s && Array.isArray(s.cats) && Array.isArray(s.items)) { cats = s.cats; items = s.items; return; }
+  } catch (e) {}
+  cats = defaultCats(); items = [];
+  persist();
+}
+function persist() {
+  try { localStorage.setItem(STORE, JSON.stringify({ cats, items, savedAt: Date.now() })); return true; }
+  catch (e) { toast("저장하지 못했어요. 저장 공간을 확인해 주세요."); return false; }
+}
+function commit(fn, msg) { fn(); if (persist() && msg) toast(msg); render(); }
+
+const ui = { form: null, confirm: null, pendingImport: null, legendOpen: true, collapsed: new Set(), hideChecked: false };
+try {
+  const saved = JSON.parse(localStorage.getItem(UI_STORE) || "{}");
+  if (typeof saved.legendOpen === "boolean") ui.legendOpen = saved.legendOpen;
+  if (Array.isArray(saved.collapsed)) ui.collapsed = new Set(saved.collapsed);
+  if (typeof saved.hideChecked === "boolean") ui.hideChecked = saved.hideChecked;
+} catch (e) {}
+function saveUi() {
+  try { localStorage.setItem(UI_STORE, JSON.stringify({ legendOpen: ui.legendOpen, collapsed: [...ui.collapsed], hideChecked: ui.hideChecked })); } catch (e) {}
+}
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const itemW = it => (Number(it.weight) || 0) * (Number(it.qty) || 1);
+function fmtW(g) {
+  if (g >= 1000) return (g / 1000).toFixed(2) + " kg";
+  return (Math.round(g * 10) / 10) + " g";
+}
+const catColor = c => c.color || PALETTE[0];
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg; el.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.hidden = true; }, 2600);
+}
+
+/* ---------- render ---------- */
+function donutSvg(segs, total) {
+  const r = 52, C = 2 * Math.PI * r;
+  let off = 0, out = `<circle cx="70" cy="70" r="${r}" fill="none" stroke="var(--sunk)" stroke-width="18"/>`;
+  if (total > 0) for (const s of segs) {
+    const len = s.w / total * C;
+    if (len <= 0) continue;
+    const gap = segs.length > 1 ? Math.min(1.5, len / 3) : 0;
+    out += `<circle cx="70" cy="70" r="${r}" fill="none" stroke="${s.color}" stroke-width="18" stroke-dasharray="${Math.max(len - gap, 0.01)} ${C}" stroke-dashoffset="${-off}"/>`;
+    off += len;
+  }
+  return `<svg viewBox="0 0 140 140" aria-hidden="true">${out}</svg>`;
+}
+
+function itemForm(it, mode, catId) {
+  const v = it || { name: "", qty: 1, weight: "", kind: "base" };
+  const withCat = mode === "edit";
+  return `<form class="form${withCat ? " has-cat" : ""}" data-form="${mode}" data-id="${esc(it ? it.id : "")}" data-cat="${esc(catId)}">
+    <div class="field name"><label for="f-name">장비 이름</label><input id="f-name" required maxlength="120" value="${esc(v.name)}" placeholder="예: 다운 재킷" autocomplete="off"></div>
+    <div class="field"><label for="f-qty">개수</label><input id="f-qty" type="number" min="1" step="1" inputmode="numeric" value="${esc(v.qty)}"></div>
+    <div class="field"><label for="f-weight">무게 (g, 1개)</label><input id="f-weight" type="number" min="0" step="0.1" inputmode="decimal" value="${esc(v.weight)}" placeholder="0"></div>
+    <div class="field"><label for="f-kind">구분</label><select id="f-kind">${Object.entries(KINDS).map(([k, l]) => `<option value="${k}"${v.kind === k ? " selected" : ""}>${l}</option>`).join("")}</select></div>
+    ${withCat ? `<div class="field"><label for="f-cat">분류</label><select id="f-cat">${cats.map(c => `<option value="${esc(c.id)}"${c.id === catId ? " selected" : ""}>${esc(c.name)}</option>`).join("")}</select></div>` : ""}
+    <div class="form-actions"><button type="button" class="btn" data-action="cancel">취소</button><button type="submit" class="btn primary">${mode === "edit" ? "저장" : "추가"}</button></div>
+  </form>`;
+}
+function catForm(c) {
+  return `<form class="form cat-form" data-form="${c ? "edit-cat" : "add-cat"}" data-id="${esc(c ? c.id : "")}">
+    <div class="field"><label for="f-catname">분류 이름</label><input id="f-catname" required maxlength="60" value="${esc(c ? c.name : "")}" placeholder="예: Rain gear" autocomplete="off"></div>
+    <div class="form-actions" style="grid-column:auto"><button type="button" class="btn" data-action="cancel">취소</button><button type="submit" class="btn primary">${c ? "저장" : "추가"}</button></div>
+  </form>`;
+}
+function confirmBox(text, type, id, yes) {
+  return `<div class="confirm" role="alertdialog"><p>${text}</p><button class="btn" data-action="cancel">취소</button><button class="btn danger solid" data-action="confirm-yes" data-type="${type}" data-id="${esc(id)}">${yes}</button></div>`;
+}
+
+function render() {
+  const app = document.getElementById("app");
+  const focusId = document.activeElement && document.activeElement.id;
+
+  const sortedCats = [...cats].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  const catIds = new Set(cats.map(c => c.id));
+  const live = items.filter(it => catIds.has(it.categoryId));
+
+  const byKind = { base: 0, consumable: 0, worn: 0 };
+  const byCat = {};
+  let total = 0, checkedN = 0, checkedW = 0;
+  for (const it of live) {
+    const w = itemW(it);
+    byKind[it.kind in byKind ? it.kind : "base"] += w;
+    byCat[it.categoryId] = (byCat[it.categoryId] || 0) + w;
+    total += w;
+    if (it.checked) { checkedN++; checkedW += w; }
+  }
+  const segs = sortedCats.map(c => ({ id: c.id, name: c.name, color: catColor(c), w: byCat[c.id] || 0 })).sort((a, b) => b.w - a.w);
+  const pct = w => total > 0 ? Math.round(w / total * 100) + "%" : "0%";
+
+  let html = `<section class="summary" aria-label="무게 요약">
+    <div class="sum-top">
+      <div class="donut">${donutSvg(segs, total)}<div class="donut-center"><div><b class="num">${fmtW(total)}</b><span>총 무게</span></div></div></div>
+      <div class="stats">
+        <div class="stat"><div class="stat-label"><i style="background:var(--k-base)"></i>베이스</div><div class="stat-val num">${fmtW(byKind.base)}</div></div>
+        <div class="stat"><div class="stat-label"><i style="background:var(--k-worn)"></i>착용</div><div class="stat-val num">${fmtW(byKind.worn)}</div></div>
+        <div class="stat"><div class="stat-label"><i style="background:var(--k-cons)"></i>소모</div><div class="stat-val num">${fmtW(byKind.consumable)}</div></div>
+        <div class="stat total"><div class="stat-label">총 무게</div><div class="stat-val num">${fmtW(total)}</div></div>
+      </div>
+      <button class="chev" data-action="toggle-legend" aria-expanded="${ui.legendOpen}" aria-label="분류별 무게 ${ui.legendOpen ? "접기" : "펼치기"}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 15l6-6 6 6"/></svg>
+      </button>
+    </div>
+    <div class="progress">
+      <div class="progress-row"><span>패킹 체크 <b class="num">${checkedN}</b> / <span class="num">${live.length}</span></span><span class="num">${fmtW(checkedW)} 챙김</span></div>
+      <div class="bar"><div style="width:${live.length ? checkedN / live.length * 100 : 0}%"></div></div>
+    </div>
+    ${ui.legendOpen && segs.length ? `<ul class="legend">${segs.map(s => `<li><span class="dot" style="--c:${s.color}"></span><a href="#cat-${esc(s.id)}" data-action="jump" data-id="${esc(s.id)}">${esc(s.name)}</a><span class="w num">${fmtW(s.w)}</span><span class="pct num">${pct(s.w)}</span></li>`).join("")}</ul>` : ""}
+  </section>`;
+
+  html += `<div class="toolbar"><h2>분류별 장비</h2><div class="top-actions">
+    <button class="btn${ui.hideChecked ? " on" : ""}" data-action="toggle-hide" aria-pressed="${ui.hideChecked}">체크한 장비 숨기기</button>
+    ${checkedN ? `<button class="btn" data-action="ask-reset">체크 모두 해제</button>` : ""}
+  </div></div>`;
+  if (ui.confirm && ui.confirm.type === "reset") html += confirmBox(`체크한 장비 ${checkedN}개를 모두 해제할까요?`, "reset", "", "모두 해제");
+  if (ui.confirm && ui.confirm.type === "import" && ui.pendingImport)
+    html += confirmBox(`백업 파일로 바꿀까요? 지금 목록은 백업 내용(분류 ${ui.pendingImport.cats.length}개, 장비 ${ui.pendingImport.items.length}개)으로 대체돼요.`, "import", "", "불러오기");
+
+  if (!sortedCats.length) {
+    html += `<div class="state"><b>아직 분류가 없어요</b>분류를 만든 다음 그 안에 장비를 기록하세요.<div class="top-actions" style="justify-content:center"><button class="btn primary" data-action="seed-cats">기본 분류 만들기</button><button class="btn" data-action="add-cat">직접 분류 추가</button></div></div>`;
+  }
+
+  html += `<div class="cats">`;
+  for (const c of sortedCats) {
+    const its = live.filter(it => it.categoryId === c.id).sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0));
+    const done = its.filter(it => it.checked).length;
+    const closed = ui.collapsed.has(c.id);
+    const shown = ui.hideChecked ? its.filter(it => !it.checked) : its;
+    const editingCat = ui.form && ui.form.type === "edit-cat" && ui.form.id === c.id;
+
+    html += `<section class="cat${closed ? " closed" : ""}" id="cat-${esc(c.id)}">
+      <div class="cat-head">
+        <button class="cat-toggle" data-action="toggle-cat" data-id="${esc(c.id)}" aria-expanded="${!closed}">
+          <svg class="cat-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          <span class="dot" style="--c:${catColor(c)}"></span>
+          <span class="cat-name">${esc(c.name)}</span>
+          <span class="cat-count num${its.length && done === its.length ? " done" : ""}">${done}/${its.length}</span>
+        </button>
+        <span class="cat-weight num">${fmtW(byCat[c.id] || 0)}</span>
+        <div class="cat-tools">
+          <button class="link" data-action="edit-cat" data-id="${esc(c.id)}" aria-label="${esc(c.name)} 분류 이름 수정">수정</button>
+          <button class="link del" data-action="ask-del-cat" data-id="${esc(c.id)}" aria-label="${esc(c.name)} 분류 삭제">삭제</button>
+        </div>
+      </div>
+      <div class="cat-body">`;
+    if (editingCat) html += catForm(c);
+    if (ui.confirm && ui.confirm.type === "cat" && ui.confirm.id === c.id)
+      html += confirmBox(`'${esc(c.name)}' 분류와 그 안의 장비 ${its.length}개를 삭제할까요?`, "cat", c.id, "삭제");
+
+    if (!its.length) html += `<div class="empty-cat">아직 장비가 없어요.</div>`;
+    else if (!shown.length) html += `<div class="empty-cat">모두 체크했어요.</div>`;
+    html += `<ul class="items">`;
+    for (const it of shown) {
+      if (ui.form && ui.form.type === "edit-item" && ui.form.id === it.id) { html += `<li>${itemForm(it, "edit", c.id)}</li>`; continue; }
+      const kind = it.kind in KINDS ? it.kind : "base";
+      html += `<li class="item${it.checked ? " checked" : ""}">
+        <label class="chk"><input type="checkbox" id="chk-${esc(it.id)}" data-action="check" data-id="${esc(it.id)}"${it.checked ? " checked" : ""} aria-label="${esc(it.name)} 챙김"><span></span></label>
+        <div class="item-main"><span class="item-name">${esc(it.name)}</span><span class="kind kind-${kind}">${KINDS[kind]}</span></div>
+        <div class="item-num num">${(Number(it.qty) || 1) > 1 ? `<span class="q">${fmtW(Number(it.weight) || 0)} × ${Number(it.qty)}</span>` : ""}<span>${fmtW(itemW(it))}</span></div>
+        <div class="item-tools"><button class="link" data-action="edit-item" data-id="${esc(it.id)}">수정</button><button class="link del" data-action="ask-del-item" data-id="${esc(it.id)}">삭제</button></div>
+      </li>`;
+      if (ui.confirm && ui.confirm.type === "item" && ui.confirm.id === it.id)
+        html += `<li>${confirmBox(`'${esc(it.name)}'을(를) 삭제할까요?`, "item", it.id, "삭제")}</li>`;
+    }
+    html += `</ul>`;
+    if (ui.form && ui.form.type === "add-item" && ui.form.cat === c.id) html += itemForm(null, "add", c.id);
+    else html += `<div class="add-row"><button class="link" data-action="add-item" data-id="${esc(c.id)}">+ 장비 추가</button></div>`;
+    html += `</div></section>`;
+  }
+  html += `</div>`;
+
+  if (sortedCats.length) {
+    html += ui.form && ui.form.type === "add-cat"
+      ? `<section class="cat">${catForm(null)}</section>`
+      : `<div><button class="btn" data-action="add-cat">+ 분류 추가</button></div>`;
+  }
+
+  app.innerHTML = html;
+  if (focusId) { const el = document.getElementById(focusId); if (el) el.focus({ preventScroll: true }); }
+}
+
+function openForm(f) {
+  ui.form = f; ui.confirm = null; render();
+  const first = document.querySelector("form[data-form] input");
+  if (first) { first.focus(); first.select && first.select(); }
+}
+
+/* ---------- backup ---------- */
+function exportBackup() {
+  const d = new Date();
+  const stamp = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  const blob = new Blob([JSON.stringify({ app: "tmb-gear", version: 1, exportedAt: d.toISOString(), cats, items }, null, 2)], { type: "application/json" });
+  const name = `tmb-gear-${stamp}.json`;
+  const file = new File([blob], name, { type: "application/json" });
+  // on phones, the share sheet is the easiest way to save to Files / iCloud / Drive
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    navigator.share({ files: [file], title: "TMB 기어 백업" }).catch(() => {});
+    return;
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+document.getElementById("import-file").addEventListener("change", async e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    if (!d || !Array.isArray(d.cats) || !Array.isArray(d.items)) throw new Error("shape");
+    ui.pendingImport = { cats: d.cats, items: d.items };
+    ui.form = null; ui.confirm = { type: "import" }; render();
+    window.scrollTo({ top: 0 });
+  } catch (err) {
+    toast("백업 파일을 읽지 못했어요. 이 앱에서 내보낸 .json 파일인지 확인해 주세요.");
+  }
+});
+
+/* ---------- events ---------- */
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-action]");
+  if (!b || b.dataset.action === "check") return;
+  const id = b.dataset.id;
+  switch (b.dataset.action) {
+    case "toggle-legend": ui.legendOpen = !ui.legendOpen; saveUi(); render(); break;
+    case "toggle-hide": ui.hideChecked = !ui.hideChecked; saveUi(); render(); break;
+    case "toggle-cat": ui.collapsed.has(id) ? ui.collapsed.delete(id) : ui.collapsed.add(id); saveUi(); render(); break;
+    case "jump": {
+      e.preventDefault();
+      if (ui.collapsed.delete(id)) { saveUi(); render(); }
+      const el = document.getElementById("cat-" + id);
+      if (el) el.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+      break;
+    }
+    case "add-item": ui.collapsed.delete(id); openForm({ type: "add-item", cat: id }); break;
+    case "edit-item": openForm({ type: "edit-item", id }); break;
+    case "add-cat": openForm({ type: "add-cat" }); break;
+    case "edit-cat": ui.collapsed.delete(id); openForm({ type: "edit-cat", id }); break;
+    case "cancel": ui.form = null; ui.confirm = null; ui.pendingImport = null; render(); break;
+    case "ask-del-item": ui.form = null; ui.confirm = { type: "item", id }; render(); break;
+    case "ask-del-cat": ui.form = null; ui.collapsed.delete(id); ui.confirm = { type: "cat", id }; render(); break;
+    case "ask-reset": ui.form = null; ui.confirm = { type: "reset" }; render(); break;
+    case "confirm-yes": doConfirm(b.dataset.type, id); break;
+    case "seed-cats": commit(() => { cats = defaultCats(); }, "기본 분류를 만들었어요"); break;
+    case "export": exportBackup(); break;
+  }
+});
+
+document.addEventListener("change", e => {
+  const el = e.target;
+  if (el.dataset && el.dataset.action === "check") {
+    const it = items.find(x => x.id === el.dataset.id);
+    if (it) commit(() => { it.checked = el.checked; });
+  }
+});
+
+document.addEventListener("submit", e => {
+  e.preventDefault();
+  const f = e.target;
+  const mode = f.dataset.form, id = f.dataset.id;
+  if (mode === "add-cat" || mode === "edit-cat") {
+    const name = document.getElementById("f-catname").value.trim();
+    if (!name) return;
+    ui.form = null;
+    if (mode === "add-cat") {
+      const order = cats.reduce((m, c) => Math.max(m, c.order ?? 0), 0) + 1;
+      commit(() => { cats.push({ id: uid(), name, order, color: PALETTE[cats.length % PALETTE.length] }); }, "분류를 추가했어요");
+    } else {
+      commit(() => { const c = cats.find(x => x.id === id); if (c) c.name = name; });
+    }
+    return;
+  }
+  const name = document.getElementById("f-name").value.trim();
+  if (!name) return;
+  const qty = Math.max(1, Math.round(Number(document.getElementById("f-qty").value) || 1));
+  const weight = Math.max(0, Number(document.getElementById("f-weight").value) || 0);
+  const kind = document.getElementById("f-kind").value;
+  if (mode === "add") {
+    const cat = f.dataset.cat;
+    commit(() => { items.push({ id: uid(), categoryId: cat, name, qty, weight, kind, checked: false, createdAt: Date.now() }); });
+    // keep the add form open for quick entry of the next item
+    const k = document.getElementById("f-kind"); if (k) k.value = kind;
+    const n = document.getElementById("f-name"); if (n) n.focus();
+  } else {
+    const catSel = document.getElementById("f-cat");
+    ui.form = null;
+    commit(() => {
+      const it = items.find(x => x.id === id);
+      if (!it) return;
+      Object.assign(it, { name, qty, weight, kind });
+      if (catSel) it.categoryId = catSel.value;
+    });
+  }
+});
+
+function doConfirm(type, id) {
+  ui.confirm = null;
+  if (type === "item") return commit(() => { items = items.filter(it => it.id !== id); }, "삭제했어요");
+  if (type === "cat") return commit(() => { items = items.filter(it => it.categoryId !== id); cats = cats.filter(c => c.id !== id); }, "분류를 삭제했어요");
+  if (type === "reset") return commit(() => { items.forEach(it => { it.checked = false; }); }, "체크를 모두 해제했어요");
+  if (type === "import" && ui.pendingImport) {
+    const d = ui.pendingImport; ui.pendingImport = null;
+    return commit(() => { cats = d.cats; items = d.items; }, "백업을 불러왔어요");
+  }
+  render();
+}
+
+/* ---------- boot ---------- */
+loadData();
+render();
+// keep other open tabs in sync
+window.addEventListener("storage", e => { if (e.key === STORE) { loadData(); render(); } });
+// ask the browser not to evict local data
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+</script>
+</body>
+</html>
