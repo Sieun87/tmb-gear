@@ -1,5 +1,5 @@
 // Offline support: app files are cached so the list opens on the trail without signal.
-const CACHE = "tmb-app-v3";
+const CACHE = "tmb-app-v5";
 const FILES = ["./", "index.html", "manifest.webmanifest", "icon.svg", "icon-180.png", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", e => {

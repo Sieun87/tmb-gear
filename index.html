@@ -428,6 +428,39 @@ a.icon-btn, button.icon-btn { cursor: pointer; }
 /* iOS zooms into inputs under 16px on focus; the viewport meta stops that, sizes stay as designed */
 .meta-in { flex: 0 0 74px; width: 74px; }
 .cat-sel { flex: 0 0 96px !important; width: 96px !important; }
+.ck-count { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--rose); color: #fff; font-size: 10px; margin-left: 4px; vertical-align: 2px; }
+.ck-progress { display: flex; align-items: center; gap: 10px; font-size: 10.5px; color: var(--sub); margin: -4px 0 12px; }
+.ck-progress .bar { flex: 1; height: 6px; border-radius: 999px; background: var(--soft); overflow: hidden; }
+.ck-progress .bar i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--rose), var(--lav)); transition: width .3s; }
+.ck-head { padding: 6px 18px 4px; }
+.ck-progress.big { background: var(--surface); border-radius: 18px; padding: 14px 16px; box-shadow: var(--shadow-sm); margin: 0; font-size: 11.5px; font-weight: 500; color: var(--ink); }
+.ck-progress.big .bar { height: 8px; }
+.ck-box { width: 22px; height: 22px; border-radius: 7px; flex: none; background: var(--surface); box-shadow: inset 0 0 0 1.5px #C9BEDD; display: grid; place-items: center; cursor: pointer; padding: 0; }
+.ck-box.on { background: var(--check); box-shadow: none; }
+.ck-box.on::after { content: ""; width: 5px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; transform: translateY(-1px) rotate(45deg); }
+.ck-row { gap: 8px; padding-left: 10px; }
+.ck-row .name { font-weight: 500; }
+.ck-row.done { background: rgba(255,255,255,.55); box-shadow: none; }
+.ck-row.done .name { color: var(--muted); text-decoration: line-through; text-decoration-color: #D6CFE0; font-weight: 400; }
+.ck-row.done .handle { visibility: hidden; }
+.ck-sep { font-size: 11px; color: var(--muted); margin: 8px 4px 0; display: flex; align-items: center; gap: 6px; }
+.ck-sep::after { content: ""; flex: 1; border-top: 1px dashed var(--line); }
+.ck-mini { gap: 10px; }
+.ck-mini .ck-box { width: 18px; height: 18px; border-radius: 6px; }
+.ck-row { flex-wrap: wrap; }
+.ck-row > .name { flex: 1 1 0; }
+.ck-link { height: 28px; min-width: 28px; padding: 0 7px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; gap: 3px; flex: none; color: var(--lav-deep); background: color-mix(in srgb, var(--lav) 16%, #fff); text-decoration: none; font-size: 10.5px; }
+.ck-link b { font-weight: 700; }
+.ck-link[aria-expanded="true"] { background: var(--lav-deep); color: #fff; }
+.ck-row.done .ck-link { opacity: .55; }
+.ck-links { flex-basis: 100%; display: grid; gap: 4px; padding: 4px 0 2px 52px; }
+.ck-links a { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--lav-deep); text-decoration: none; padding: 6px 10px; border-radius: 10px; background: var(--soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ck-link-fields .jf { background: var(--soft); }
+.ck-url { width: 100%; min-width: 0; border: 0; background: transparent; outline: none; font-size: 12px; padding: 2px 0; }
+.ck-mini .ck-box { pointer-events: none; }
+.ck-row > .name { display: grid; line-height: 1.35; min-width: 0; }
+.ck-memo { font-size: 10.5px; color: var(--muted); font-weight: 400; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-line; overflow-wrap: anywhere; }
+.ck-row.done .ck-memo { text-decoration: none; }
 </style>
 </head>
 <body>
@@ -500,6 +533,7 @@ const SCENES = {
   dawn: { sky: ["#7FB2F3", "#C9C7F4", "#F6C9DA"], far: "#E6C7EC", mid: "#B79AE0", near: "#8F7FD6", sun: "#FFF4F7", lake: ["#9CD3F2", "#BFE3F6"] },
   dusk: { sky: ["#A390EC", "#D2A6E3", "#F6C6D2"], far: "#F0C2DA", mid: "#C597DF", near: "#8E73D2", sun: "#FFE9F0", lake: ["#C7B3F0", "#E9D3F2"] },
   night: { sky: ["#5D63C9", "#9C88E0", "#E7B6D6"], far: "#B9A3E6", mid: "#8C7AD8", near: "#5E56B8", sun: "#FFF8F0", lake: ["#8F8BE0", "#B6A8EA"] },
+  sky: { sky: ["#6FB2EA", "#A9D2F2", "#F3D6E6"], far: "#D9E4F6", mid: "#9DB6E8", near: "#6F8AD6", sun: "#FFF8F0", lake: ["#9ED6E8", "#CFEBF4"] },
   pink: { sky: ["#F1A9C6", "#E8B9E6", "#F8D6E2"], far: "#F6D2E4", mid: "#E2A3CC", near: "#B98AD4", sun: "#FFF5F8", lake: ["#F2C2DA", "#F7DCEA"] },
 };
 const tint = c => ({ sky: [mix(c, "#7E6BD9", .45), mix(c, "#FFFFFF", .25), mix(c, "#FFFFFF", .6)], far: mix(c, "#FFFFFF", .55), mid: mix(c, "#B79AE0", .3), near: mix(c, "#5E56B8", .45), sun: "#FFF7FA", lake: [mix(c, "#FFFFFF", .35), mix(c, "#FFFFFF", .65)] });
@@ -538,13 +572,16 @@ function seed() {
     trips: [{ id: uid(), day: "D1", mode: "walk", from: "레 우슈", to: "레 콩타민", dist: "16 km", time: "", country: "프랑스", water: "", stayId: stay.id, hutIds: [], memo: "" }],
     stays: [stay],
     huts: [hut],
+    todos: [{ id: uid(), text: "여행자보험 들기", done: false, links: [], at: Date.now() }],
   };
 }
 function valid(d) {
   return d && d.v === 2 && ["cats", "gear", "wish", "trips", "stays", "huts"].every(k => Array.isArray(d[k]));
 }
+// data and backups from before the Plan page have no todos yet
+function upgrade(d) { if (!Array.isArray(d.todos)) d.todos = []; return d; }
 function load() {
-  try { const d = JSON.parse(localStorage.getItem(KEY)); if (valid(d)) return d; } catch (_) {}
+  try { const d = JSON.parse(localStorage.getItem(KEY)); if (valid(d)) return upgrade(d); } catch (_) {}
   const d = seed(); save(d); return d;
 }
 function save(d = D) {
@@ -629,8 +666,8 @@ const S = {};
 
 // ---------- Main
 S.main = () => {
-  const cards = [["Gear", "dawn"], ["이동", "dusk"], ["숙박", "night"], ["산장", "pink"]];
-  const panel = [mainGear, mainTrips, mainStays, mainHuts][U.mainTab]();
+  const cards = [["Plan", "sky"], ["Gear", "dawn"], ["Journey", "dusk"], ["Stay", "night"], ["Hut", "pink"]];
+  const panel = PANELS[U.mainTab]();
   return `<div class="phone">
     <div class="main-scroll" id="main-scroll">
       <div class="topbar" style="justify-content:flex-end"><button class="icon-btn" data-act="search" style="color:#B79AD8" aria-label="검색">${I.search}</button></div>
@@ -657,17 +694,58 @@ function mainTrips() {
   const t = D.trips;
   return `<div class="lower-head"><h3>여정</h3><a href="#" data-act="to" data-s="trips">전체보기</a></div>`
     + (t.length ? `<ol class="journey">${t.slice(0, 6).map(x => `<li class="j-step" data-act="to" data-s="trip" data-id="${x.id}"><span class="j-day">${esc(x.day)}</span><span class="j-node">${MODES[x.mode].icon}</span><span class="j-route">${esc(x.from)} → ${esc(x.to)}</span>${x.dist || x.time ? `<span class="j-meta">${esc(x.dist || x.time)}</span>` : "<span></span>"}</li>`).join("")}</ol>`
-      : `<div class="empty"><b>아직 비어있어요</b>이동에서 첫 여정을 등록해 보세요</div>`);
+      : `<div class="empty"><b>아직 비어있어요</b>Journey에서 첫 여정을 등록해 보세요</div>`);
 }
 const placeMeta = x => [x.country, x.type].filter(Boolean).join(" · ");
 function mainPlaces(kind, title) {
   const list = D[kind];
   return `<div class="lower-head"><h3>${title}</h3><a href="#" data-act="to" data-s="${kind}">전체보기</a></div>`
     + (list.length ? `<div class="mini-list">${list.slice(0, 5).map(x => `<div class="row mini" data-act="to" data-s="${kind === "stays" ? "stay" : "hut"}" data-id="${x.id}"><span class="name">${esc(x.name)}<span class="meta">${esc(placeMeta(x))}</span></span></div>`).join("")}</div>`
-      : `<div class="empty"><b>아직 비어있어요</b>${title}에서 첫 곳을 등록해 보세요</div>`);
+      : `<div class="empty"><b>아직 비어있어요</b>${kind === "stays" ? "Stay" : "Hut"}에서 첫 곳을 등록해 보세요</div>`);
 }
 const mainStays = () => mainPlaces("stays", "숙박");
 const mainHuts = () => mainPlaces("huts", "산장");
+function mainPlan() {
+  const todo = D.todos.filter(x => !x.done), n = D.todos.length, dn = n - todo.length;
+  return `<div class="lower-head"><h3>남은 할 일${todo.length ? ` <span class="ck-count">${todo.length}</span>` : ""}</h3><a href="#" data-act="to" data-s="plan">전체보기</a></div>`
+    + (n ? `<div class="ck-progress"><div class="bar"><i style="width:${dn / n * 100}%"></i></div><span>${dn} / ${n} 완료</span></div>` : "")
+    + (todo.length ? `<div class="mini-list">${todo.slice(0, 5).map(x => `<div class="row mini ck-mini" data-act="to" data-s="plan"><span class="ck-box"></span><span class="name">${esc(x.text)}</span></div>`).join("")}</div>`
+      : `<div class="empty"><b>${n ? "모두 끝냈어요" : "아직 비어있어요"}</b>${n ? "출발 준비 완료!" : "Plan에서 첫 할 일을 등록해 보세요"}</div>`);
+}
+const PANELS = [mainPlan, mainGear, mainTrips, mainStays, mainHuts];
+
+
+// ---------- E. Plan checklist
+const TF = () => U.tf || (U.tf = { open: false, edit: null, urls: [""] });
+S.plan = () => {
+  const f = TF(), todo = D.todos.filter(x => !x.done), done = D.todos.filter(x => x.done).sort((a, b) => (a.doneAt || 0) - (b.doneAt || 0));
+  const n = D.todos.length, editing = f.edit ? D.todos.find(x => x.id === f.edit) : null;
+  const row = x => {
+    const links = x.links || [], open = U.openLinks === x.id;
+    const lb = links.length > 1 ? `<button class="ck-link" data-act="todoLinks" data-id="${x.id}" aria-expanded="${open}" aria-label="링크 ${links.length}개">${I.link}<b>${links.length}</b></button>`
+      : links.length ? `<a class="ck-link" href="${esc(links[0])}" target="_blank" rel="noopener noreferrer" title="${esc(host(links[0]))}" aria-label="링크 열기">${I.link}</a>` : "";
+    return `<div class="row ck-row${x.done ? " done" : " drag-row"}${U.fresh === x.id ? " flash" : ""}${editing && editing.id === x.id ? " selected" : ""}"${x.done ? "" : ` data-drag-id="${x.id}"`}>`
+      + `<span class="handle">${I.grip}</span><button class="ck-box${x.done ? " on" : ""}" data-act="todoCheck" data-id="${x.id}" aria-label="${x.done ? "완료 취소" : "완료"}" aria-pressed="${x.done}"></button>`
+      + `<span class="name">${esc(x.text)}${x.memo ? `<small class="ck-memo">${esc(x.memo)}</small>` : ""}</span>${lb}<button class="icon-sm" data-act="todoEdit" data-id="${x.id}" aria-label="수정">✎</button><button class="icon-sm del" data-act="todoDel" data-id="${x.id}" aria-label="삭제">✕</button>`
+      + (links.length > 1 && open ? `<div class="ck-links">${links.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${I.link}${esc(host(u) + new URL(u).pathname.replace(/\/$/, ""))}</a>`).join("")}</div>` : "")
+      + `</div>`;
+  };
+  return `<div class="phone">
+    ${navBar("Plan")}
+    <div class="ck-head"><div class="ck-progress big"><div class="bar"><i style="width:${n ? done.length / n * 100 : 0}%"></i></div><span>${done.length} / ${n} 완료</span></div></div>
+    <div class="list-head"><h3>해야 할 일</h3><span>길게 눌러 순서 변경</span></div>
+    <div class="scroll"><div class="list" data-drag-list="todos">
+      ${todo.length ? todo.map(row).join("") : `<div class="empty"><b>${n ? "모두 끝냈어요" : "아직 비어있어요"}</b>${n ? "출발 준비 완료!" : "아래에서 첫 할 일을 등록해 보세요"}</div>`}
+      ${done.length ? `<div class="ck-sep">완료 <span>${done.length}</span></div>${done.map(row).join("")}` : ""}
+    </div></div>
+    <form class="j-addbar${f.open ? " open" : ""}" data-form="todo">
+      <div class="j-addbar-title"><span>${editing ? `<span class="wish-editing">'${esc(editing.text)}' 수정 중</span> <button type="button" class="j-cancel-after" data-act="todoCancel">취소</button>` : `할 일 추가 <em>맨 아래에 붙어요</em>`}</span><button type="button" class="j-more" data-act="todoMore" aria-expanded="${f.open}">${f.open ? "접기" : "링크 · 메모"} ${I.chevUp}</button></div>
+      <div class="row add"><input class="input" id="td-text" data-keep placeholder="예: 여행자보험 들기" aria-label="할 일">${f.open ? "" : `<button class="icon-act" aria-label="등록">${I.plus}</button>`}</div>
+      ${f.open ? `<div class="j-fields">${jf("링크", `<div class="hut-rows">${f.urls.map((_, i) => `<div class="hut-row"><input class="ck-url" id="td-url-${i}" data-keep placeholder="https://" inputmode="url" autocapitalize="off" spellcheck="false" aria-label="링크 ${i + 1}">${f.urls.length > 1 ? `<button type="button" class="hut-rm" data-act="urlRm" data-i="${i}" aria-label="이 링크 빼기">✕</button>` : ""}</div>`).join("")}</div><button type="button" class="hut-add" data-act="urlAdd">+ 링크 추가</button>`, true, "주소를 붙여넣기 · 여러 개 가능")}
+        ${jf("메모", ta("td-memo", "예: 보험사 이름, 가입 번호, 확인할 것"), true)}
+        <button class="btn-primary j-submit">${editing ? "저장" : "등록"}</button></div>` : ""}
+    </form></div>`;
+};
 
 // ---------- A. gear categories
 S.gear = () => {
@@ -817,7 +895,7 @@ S.trips = () => {
   const f = JF(), after = f.after ? tripOf(f.after) : null;
   if (!U.draft["jf-day"]) U.draft["jf-day"] = nextDay();
   return `<div class="phone" id="jphone">
-    ${navBar("이동")}
+    ${navBar("Journey")}
     <div class="j-sub">${D.trips.length}개 구간 · 길게 눌러 순서 변경</div>
     <div class="scroll"><div class="pad" style="padding-bottom:14px">
       ${D.trips.length ? `<ol class="journey full" data-drag-list="trips">${D.trips.map(x => {
@@ -874,12 +952,12 @@ S.tripEdit = t => {
 
 // ---------- B / C. stays and refuges
 const KIND = {
-  stays: { title: "숙박", one: "stay", art: "night", ph: "숙소명",
+  stays: { title: "숙박", page: "Stay", one: "stay", art: "night", ph: "숙소명",
     fields: (p, x) => `${jf("종류", `<select class="hut-sel" id="${p}-type" data-keep>${opts(STAY_TYPES, x.type || "", "선택 안 함")}</select>`)}${jf("체크인", tx(p + "-checkin", "16:00 ~", x.checkin))}
       ${jf("위치", tx(p + "-loc", "주소나 찾아가는 법", x.loc), true)}${jf("가격", tx(p + "-price", "1인 약 €60", x.price))}${jf("연락처", tx(p + "-tel", "+33 …", x.tel))}`,
     keys: ["type", "checkin", "loc", "price", "tel"],
     info: x => kv("위치", x.loc) + kv("체크인", x.checkin) + kv("연락처", x.tel) + kv("가격", x.price) },
-  huts: { title: "산장", one: "hut", art: "pink", ph: "산장명",
+  huts: { title: "산장", page: "Hut", one: "hut", art: "pink", ph: "산장명",
     fields: (p, x) => `${jf("가는 길", tx(p + "-way", "어디서 몇 km", x.way), true)}${jf("결제", tx(p + "-pay", "현금 · 카드", x.pay))}${jf("연락처", tx(p + "-tel", "+39 …", x.tel))}`,
     keys: ["way", "pay", "tel"],
     info: x => kv("가는 길", x.way) + kv("결제", x.pay) + kv("연락처", x.tel) },
@@ -888,7 +966,7 @@ const PF = kind => (U.pf || (U.pf = {}))[kind] || (U.pf[kind] = { open: false })
 function placeList(kind) {
   const k = KIND[kind], f = PF(kind), list = D[kind], p = "p" + kind;
   return `<div class="phone place">
-    ${navBar(k.title)}
+    ${navBar(k.page)}
     <div class="j-sub">${list.length}곳</div>
     <div class="scroll"><div class="list" style="padding-top:8px">
       ${list.length ? list.map(x => `<div class="row${U.fresh === x.id ? " flash" : ""}" data-act="to" data-s="${k.one}" data-id="${x.id}"><span class="name">${esc(x.name)}${placeMeta(x) ? `<span class="meta">${esc(placeMeta(x))}</span>` : ""}</span>${facIcons(x.facs)}<span class="chev">›</span></div>`).join("")
@@ -935,10 +1013,11 @@ S.gone = () => `<div class="phone">${navBar("")}<div class="empty" style="margin
 function searchLayer() {
   const q = (U.draft["sq"] || "").trim(), nq = norm(q);
   let body;
-  if (!q) body = `<div class="sr-tip">장비, 여정, 숙박, 산장의 이름 · 메모 · 국가 등을 찾아요</div>`;
+  if (!q) body = `<div class="sr-tip">할 일, 장비, 여정, 숙박, 산장의 이름 · 메모 · 국가 등을 찾아요</div>`;
   else {
     const hit = (...xs) => norm(xs.filter(Boolean).join(" ")).includes(nq);
     const G = [
+      ["Plan", I.check, D.todos.filter(x => hit(x.text, x.memo, ...(x.links || []))).map(x => ({ t: x.text, sub: x.done ? "완료" : "해야 할 일", more: [x.memo, ...(x.links || []).map(u => { try { const k = new URL(u); return k.hostname.replace(/^www\./, "") + k.pathname.replace(/\/$/, ""); } catch (_) { return u; } })].filter(Boolean).join(" · "), go: ["plan"] }))],
       ["장비", I.gear, [
         ...D.gear.filter(x => hit(x.name, catOf(x.catId) && catOf(x.catId).name)).map(x => ({ t: x.name, sub: `${catOf(x.catId) ? catOf(x.catId).name : "미지정"}${x.weight ? " · " + g(num(x.weight)) + "g" : ""}`, go: x.catId && catOf(x.catId) ? ["cat", x.catId] : ["inventory", null, "own"] })),
         ...D.wish.filter(x => hit(x.name, x.shop, x.price, catOf(x.catId) && catOf(x.catId).name)).map(x => ({ t: x.name, wish: 1, sub: ["위시리스트", catOf(x.catId) && catOf(x.catId).name, x.price].filter(Boolean).join(" · "), go: ["inventory", null, "wish"] })),
@@ -954,7 +1033,7 @@ function searchLayer() {
       return `<button class="sr-row" data-act="srGo" data-s="${r.go[0]}" data-id="${r.go[1] || ""}" data-tab="${r.go[2] || ""}"><span class="sr-ic">${ic}</span><span class="sr-txt"><b>${mark(r.t)}${r.wish ? ' <em class="wish-tag">위시</em>' : ""}</b><small>${mark(sub || "")}</small></span><span class="chev">›</span></button>`;
     }).join("")).join("") : `<div class="sr-empty">'${esc(q)}'에 맞는 항목이 없어요</div>`;
   }
-  return `<div class="search-ov" role="dialog" aria-label="검색"><div class="search-top"><label class="search-box">${I.searchSm}<input id="sq" data-keep data-live placeholder="장비, 여정, 숙박, 산장 검색" autocomplete="off" enterkeyhint="search"></label><button class="search-x" data-act="layerClose">닫기</button></div><div class="search-res">${body}</div></div>`;
+  return `<div class="search-ov" role="dialog" aria-label="검색"><div class="search-top"><label class="search-box">${I.searchSm}<input id="sq" data-keep data-live placeholder="할 일, 장비, 여정, 숙박, 산장 검색" autocomplete="off" enterkeyhint="search"></label><button class="search-x" data-act="layerClose">닫기</button></div><div class="search-res">${body}</div></div>`;
 }
 
 /* ================= render ================= */
@@ -987,7 +1066,8 @@ function onCarousel(e) {
   const car = e.currentTarget, step = car.children[1].offsetLeft - car.children[0].offsetLeft;
   // the last card can't reach the left edge, so the end of the strip counts as the last card
   const atEnd = car.scrollLeft >= car.scrollWidth - car.clientWidth - 4;
-  const i = atEnd ? 3 : Math.max(0, Math.min(3, Math.round(car.scrollLeft / step)));
+  const last = car.children.length - 1;
+  const i = atEnd ? last : Math.max(0, Math.min(last, Math.round(car.scrollLeft / step)));
   if (i === U.mainTab) { clearTimeout(carT); carT = setTimeout(swapPanel, 180); return; }
   U.mainTab = i;
   $$("#main-tabs span").forEach((s, j) => s.classList.toggle("on", j === i));
@@ -997,7 +1077,7 @@ function onCarousel(e) {
 function swapPanel() {
   const el = $(".lower-panel"); if (!el || el.dataset.i === String(U.mainTab)) return;
   el.dataset.i = U.mainTab; el.classList.remove("swap"); void el.offsetWidth; el.classList.add("swap");
-  el.innerHTML = [mainGear, mainTrips, mainStays, mainHuts][U.mainTab]();
+  el.innerHTML = PANELS[U.mainTab]();
 }
 
 /* ================= actions ================= */
@@ -1014,7 +1094,7 @@ const A = {
     car.scrollLeft = car.children[i].offsetLeft - car.children[0].offsetLeft;
     $$("#main-tabs span").forEach((s, j) => s.classList.toggle("on", j === i)); swapPanel();
   },
-  card: el => go(["gear", "trips", "stays", "huts"][+el.dataset.i]),
+  card: el => go(["plan", "gear", "trips", "stays", "huts"][+el.dataset.i]),
   srGo: el => {
     const s = el.dataset.s, p = el.dataset.id ? { id: el.dataset.id } : {};
     if (el.dataset.tab) p.tab = el.dataset.tab;
@@ -1025,6 +1105,39 @@ const A = {
     const n = Math.max(1, (parseInt(out.textContent, 10) || 1) + (+el.dataset.d)); out.textContent = n; minus.disabled = n <= 1;
   },
   fac: el => { const s = facs(el.dataset.key), k = el.dataset.fac; s.has(k) ? s.delete(k) : s.add(k); el.classList.toggle("on", s.has(k)); el.setAttribute("aria-pressed", s.has(k)); },
+
+  // plan
+  todoCheck: el => {
+    const x = D.todos.find(y => y.id === el.dataset.id);
+    commit(() => {
+      D.todos = D.todos.filter(y => y.id !== x.id);
+      x.done = !x.done;
+      if (x.done) { x.doneAt = Date.now(); D.todos.push(x); }
+      else { delete x.doneAt; D.todos.splice(D.todos.filter(y => !y.done).length, 0, x); }   // back to the end of the to-do list
+      U.fresh = x.id;
+    });
+  },
+  todoLinks: el => { U.openLinks = U.openLinks === el.dataset.id ? null : el.dataset.id; render(); },
+  todoMore: () => { const f = TF(); f.open = !f.open; if (f.open) U.focus = "td-url-0"; render(); },
+  urlAdd: () => { const f = TF(); f.urls.push(""); U.focus = "td-url-" + (f.urls.length - 1); render(); },
+  urlRm: el => {
+    const f = TF(), vals = f.urls.map((_, j) => val("td-url-" + j)); vals.splice(+el.dataset.i, 1);
+    f.urls = vals.length ? vals : [""]; clearDraft("td-url-"); f.urls.forEach((v, j) => setD("td-url-" + j, v)); render();
+  },
+  todoEdit: el => {
+    const x = D.todos.find(y => y.id === el.dataset.id), f = TF();
+    f.open = true; f.edit = x.id; f.urls = (x.links || []).length ? [...x.links] : [""];
+    clearDraft("td-"); setD("td-text", x.text); setD("td-memo", x.memo || ""); f.urls.forEach((v, j) => setD("td-url-" + j, v));
+    U.focus = "td-text"; render();
+  },
+  todoCancel: () => { U.tf = { open: false, edit: null, urls: [""] }; clearDraft("td-"); render(); },
+  todoDel: el => {
+    const x = D.todos.find(y => y.id === el.dataset.id);
+    ask(`'${x.text}'을(를) 삭제할까요?`, "", () => commit(() => {
+      D.todos = D.todos.filter(y => y.id !== x.id);
+      if (TF().edit === x.id) { U.tf = { open: false, edit: null, urls: [""] }; clearDraft("td-"); }
+    }));
+  },
 
   // gear
   gearEdit: el => { cur().edit = el.dataset.id; clearDraft("ge-"); U.focus = "ge-name"; render(); },
@@ -1125,6 +1238,21 @@ function huts(prefix) { return prefix === "jf" ? JF().huts : cur().huts; }
 
 /* ================= forms ================= */
 const F = {
+  todo: () => {
+    const text = val("td-text"); if (!text) { $("#td-text").focus(); return; }
+    const f = TF(), editing = f.edit ? D.todos.find(y => y.id === f.edit) : null;
+    const links = f.open ? f.urls.map((_, i) => safeUrl(val("td-url-" + i))).filter(Boolean) : (editing ? editing.links || [] : []);
+    const memo = f.open ? val("td-memo") : (editing ? editing.memo || "" : "");
+    let id;
+    commit(() => {
+      if (editing) { editing.text = text; editing.links = links; editing.memo = memo; id = editing.id; }
+      else { const x = { id: uid(), text, done: false, links, memo, at: Date.now() }; id = x.id; D.todos.splice(D.todos.filter(y => !y.done).length, 0, x); }
+      U.tf = { open: false, edit: null, urls: [""] };
+    });
+    clearDraft("td-"); U.fresh = id; U.focus = "td-text"; render();
+    toast(editing ? "저장했어요" : "할 일을 추가했어요");
+  },
+
   gearAdd: f => {
     const name = val("ga-name"); if (!name) { $("#ga-name").focus(); return; }
     commit(() => D.gear.push({ id: uid(), name, weight: num(val("ga-w")), qty: stepperVal("ga-q"), catId: f.dataset.cat, at: Date.now() }));
@@ -1226,7 +1354,8 @@ async function importFile(input) {
   let d;
   try { d = JSON.parse(await file.text()); } catch (_) { d = null; }
   if (!valid(d)) { toast("이 앱에서 내보낸 백업 파일이 아니에요"); return; }
-  const n = d.gear.length + d.wish.length + d.trips.length + d.stays.length + d.huts.length;
+  upgrade(d);
+  const n = d.todos.length + d.gear.length + d.wish.length + d.trips.length + d.stays.length + d.huts.length;
   ask("백업으로 바꿀까요?", `지금 데이터가 백업 파일 내용(항목 ${n}개)으로 통째로 바뀌어요.`, () => { D = d; delete D.exportedAt; save(); U.stack = [{ s: "main" }]; render(true); toast("백업을 불러왔어요"); }, "바꾸기");
 }
 
@@ -1256,6 +1385,9 @@ document.addEventListener("pointermove", e => {
     if (drag.active.list === "cats") {
       const cats = sortedCats(); const [c] = cats.splice(from, 1); cats.splice(to, 0, c);
       cats.forEach((x, i) => { x.order = i + 1; });
+    } else if (drag.active.list === "todos") {
+      const todo = D.todos.filter(x => !x.done), done = D.todos.filter(x => x.done);
+      const [x] = todo.splice(from, 1); todo.splice(to, 0, x); D.todos = [...todo, ...done];
     } else {
       // days stay in place: whatever lands in the D2 slot becomes D2, the rest shift
       const days = D.trips.map(x => x.day);
