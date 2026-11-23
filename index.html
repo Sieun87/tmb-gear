@@ -594,7 +594,10 @@ const stayOf = id => D.stays.find(x => x.id === id);
 const hutOf = id => D.huts.find(x => x.id === id);
 const tripOf = id => D.trips.find(x => x.id === id);
 const sortedCats = () => [...D.cats].sort((a, b) => a.order - b.order);
-const gearIn = id => D.gear.filter(x => x.catId === id).sort((a, b) => a.at - b.at);
+// order inside a category: `pos` once the list has been reordered, otherwise the added order.
+// Gear saved before reordering existed has no `pos`, so it keeps the order it already had.
+const gearKey = x => (typeof x.pos === "number" ? x.pos : 1e15 + (x.at || 0));
+const gearIn = id => D.gear.filter(x => x.catId === id).sort((a, b) => gearKey(a) - gearKey(b));
 const itemW = x => num(x.weight) * (x.qty || 1);
 const catW = id => gearIn(id).reduce((s, x) => s + itemW(x), 0);
 function commit(fn) { fn(); save(); render(); }
@@ -774,12 +777,13 @@ S.cat = t => {
   const items = gearIn(c.id), w = catW(c.id);
   const rows = items.map(x => t.edit === x.id
     ? `<form class="row editing" data-form="gearEdit" data-id="${x.id}">${`<input class="input" id="ge-name" data-keep value="${esc(x.name)}" aria-label="장비명">`}${gfield("ge-w", x.weight || "")}${stepper("ge-q", x.qty || 1)}<button class="icon-act save" aria-label="저장">${I.check}</button></form>`
-    : `<div class="row"><span class="name">${esc(x.name)}${x.weight ? `<span class="meta">${g(num(x.weight))}g</span>` : ""}</span><span class="qty">${x.qty || 1}개</span><button class="icon-sm" data-act="gearEdit" data-id="${x.id}" aria-label="수정">✎</button><button class="icon-sm del" data-act="gearOut" data-id="${x.id}" aria-label="카테고리에서 빼기">✕</button></div>`).join("");
+    : `<div class="row${t.edit ? "" : ` drag-row" data-drag-id="${x.id}`}"><span class="handle">${I.grip}</span><span class="name">${esc(x.name)}${x.weight ? `<span class="meta">${g(num(x.weight))}g</span>` : ""}</span><span class="qty">${x.qty || 1}개</span><button class="icon-sm" data-act="gearEdit" data-id="${x.id}" aria-label="수정">✎</button><button class="icon-sm del" data-act="gearOut" data-id="${x.id}" aria-label="카테고리에서 빼기">✕</button></div>`).join("");
   return `<div class="phone">
     <div class="hero"><div class="art">${scene(tint(c.color))}</div>
       <div class="nav"><button class="icon-btn" data-act="back" style="color:#fff" aria-label="뒤로">${I.back}</button></div>
       <div class="hero-cap"><h2>${esc(c.name)}</h2><p><span class="dot" style="--c:#fff;width:8px;height:8px"></span>총 ${g(w)} g · ${items.length}개</p></div></div>
-    <div class="body-curve"><div class="scroll"><div class="list">
+    <div class="body-curve"><div class="scroll"><div class="list" data-drag-list="gear" data-cat="${c.id}">
+      ${items.length > 1 ? `<div class="empty-hint" style="text-align:right;padding:0 4px">길게 눌러 순서 변경</div>` : ""}
       ${items.length ? rows : `<div class="empty"><b>아직 비어있어요</b>아래에서 첫 장비를 등록해 보세요</div>`}
       <form class="row add" data-form="gearAdd" data-cat="${c.id}"><input class="input" id="ga-name" data-keep placeholder="장비명" aria-label="장비명">${gfield("ga-w")}${stepper("ga-q")}<button class="icon-act" aria-label="등록">${I.plus}</button></form>
       <button class="btn-outline" data-act="pickOpen" data-id="${c.id}">${I.plus}보유 장비에서 추가</button>
@@ -1141,10 +1145,10 @@ const A = {
 
   // gear
   gearEdit: el => { cur().edit = el.dataset.id; clearDraft("ge-"); U.focus = "ge-name"; render(); },
-  gearOut: el => { const x = D.gear.find(y => y.id === el.dataset.id); commit(() => { x.catId = null; }); toast(`'${x.name}'을(를) 미지정으로 옮겼어요. 장비현황에 그대로 있어요`); },
+  gearOut: el => { const x = D.gear.find(y => y.id === el.dataset.id); commit(() => { x.catId = null; delete x.pos; }); toast(`'${x.name}'을(를) 미지정으로 옮겼어요. 장비현황에 그대로 있어요`); },
   pickOpen: el => openLayer(() => { U.sheet = { catId: el.dataset.id, picks: new Set() }; U.draft["pick-q"] = ""; }),
   pick: el => { const s = U.sheet.picks, id = el.dataset.id; s.has(id) ? s.delete(id) : s.add(id); render(); },
-  pickDone: () => { const { catId, picks } = U.sheet; const n = picks.size; D.gear.forEach(x => { if (picks.has(x.id)) x.catId = catId; }); save(); closeLayer(); toast(`${n}개를 추가했어요`); },
+  pickDone: () => { const { catId, picks } = U.sheet; const n = picks.size; D.gear.forEach(x => { if (picks.has(x.id)) { x.catId = catId; delete x.pos; } }); save(); closeLayer(); toast(`${n}개를 추가했어요`); },
   sheetClose: (el, e) => { if (e.target === el) closeLayer(); },
   palette: el => { const t = cur(), k = el.dataset.key; t.pal = t.pal === k ? null : k; render(); },
   color: el => { const t = cur(), k = el.dataset.key, c = el.dataset.c; if (k === "new") { t.newColor = c; t.pal = null; render(); } else commit(() => { catOf(k).color = c; t.pal = null; }); },
@@ -1152,7 +1156,7 @@ const A = {
   catDel: el => {
     const c = catOf(el.dataset.id), n = gearIn(c.id).length;
     ask(`'${c.name}' 카테고리를 삭제할까요?`, n ? `안에 있는 장비 ${n}개는 지우지 않고 '미지정'으로 돌아가요.` : "", () => commit(() => {
-      D.gear.forEach(x => { if (x.catId === c.id) x.catId = null; }); D.wish.forEach(x => { if (x.catId === c.id) x.catId = null; });
+      D.gear.forEach(x => { if (x.catId === c.id) { x.catId = null; delete x.pos; } }); D.wish.forEach(x => { if (x.catId === c.id) x.catId = null; });
       D.cats = D.cats.filter(y => y.id !== c.id);
     }));
   },
@@ -1385,6 +1389,10 @@ document.addEventListener("pointermove", e => {
     if (drag.active.list === "cats") {
       const cats = sortedCats(); const [c] = cats.splice(from, 1); cats.splice(to, 0, c);
       cats.forEach((x, i) => { x.order = i + 1; });
+    } else if (drag.active.list === "gear") {
+      const items = gearIn($('[data-drag-list="gear"]').dataset.cat);
+      const [x] = items.splice(from, 1); items.splice(to, 0, x);
+      items.forEach((y, i) => { y.pos = i; });
     } else if (drag.active.list === "todos") {
       const todo = D.todos.filter(x => !x.done), done = D.todos.filter(x => x.done);
       const [x] = todo.splice(from, 1); todo.splice(to, 0, x); D.todos = [...todo, ...done];
