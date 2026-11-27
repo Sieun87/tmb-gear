@@ -418,7 +418,7 @@ a.icon-btn, button.icon-btn { cursor: pointer; }
 .palette-pop { margin: 0 0 2px 26px; }
 .palette-pop.new { margin-left: 0; }
 .cat-name-edit { flex: 1; min-width: 0; }
-.kv b.dim { color: var(--muted); font-weight: 400; }
+.kv b.kv-empty { color: var(--muted); font-weight: 400; }
 .hidden-file { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .empty-hint { font-size: 11px; color: var(--muted); text-align: center; padding: 6px 0; }
 .edit-top-save { margin-left: auto; }
@@ -660,7 +660,7 @@ const jf = (label, inner, wide, hint) => `<div class="jf${wide ? " wide" : ""}">
 const tx = (id, ph, v = "", extra = "") => `<input id="${id}" data-keep placeholder="${esc(ph)}" value="${esc(v)}" autocomplete="off"${extra}>`;
 const ta = (id, ph, v = "") => `<textarea id="${id}" data-keep rows="2" placeholder="${esc(ph)}">${esc(v)}</textarea>`;
 const val = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
-const kv = (k, v) => `<div class="kv"><span>${k}</span><b${v ? "" : ' class="dim"'}>${esc(v || "–")}</b></div>`;
+const kv = (k, v) => `<div class="kv"><span>${k}</span><b${v ? "" : ' class="kv-empty"'}>${esc(v || "–")}</b></div>`;
 const facState = {};       // key → Set, for the open forms
 const facs = (key, init) => facState[key] || (facState[key] = new Set(init || []));
 
